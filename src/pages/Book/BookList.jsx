@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Plus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import {
   fetchBooks,
   createBook,
@@ -15,12 +16,15 @@ import {
   Popconfirm,
   Space,
   Spin,
+  Modal,
 } from "antd";
+import BookForm from "./BookForm";
 
 export default function BookList() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { items: books, loading, pagination } = useSelector((state) => state.books);
+  const [editingId, setEditingId] = useState(null);
 
   useEffect(() => {
     dispatch(fetchBooks({ page: 0, size: 10 }));
@@ -31,7 +35,9 @@ export default function BookList() {
   };
 
   const handleDelete = (id) => {
-    dispatch(deleteBook(id));
+    dispatch(deleteBook(id)).unwrap().then(() => {
+      dispatch(fetchBooks({ page: pagination.currentPage, size: pagination.pageSize }));
+    });
   };
 
   const columns = [
@@ -40,67 +46,62 @@ export default function BookList() {
       dataIndex: "id",
       key: "id",
       width: 80,
-      render: (id) => <span className="font-bold text-zinc-500">#{id}</span>,
+      render: (id) => <span className="font-semibold text-zinc-500">#{id}</span>,
     },
     {
-      title: "Tên Cuốn Sách",
+      title: "Book Title",
       dataIndex: "name",
       key: "name",
-      render: (name, record) => (
-        <Link
-          to={`/books/${record.id}`}
-          className="font-bold text-zinc-800 hover:text-violet-600 :text-violet-400 transition-colors"
-        >
+      render: (name) => (
+        <span className="font-semibold text-zinc-800">
           {name}
-        </Link>
-      ),
-    },
-    {
-      title: "Tác Giả",
-      dataIndex: "authorName",
-      key: "authorName",
-      render: (authorName, record) => (
-        <Link
-          to={`/authors/${record.authorId}`}
-          className="font-semibold text-violet-600 hover:underline"
-        >
-          {authorName}
-        </Link>
-      ),
-    },
-    {
-      title: "Số Lượt Review",
-      dataIndex: "reviewsCount",
-      key: "reviewsCount",
-      render: (count) => (
-        <span className="inline-block rounded-full bg-zinc-50 px-3 py-1 text-xs font-bold text-zinc-500">
-          {count || 0} lượt review
         </span>
       ),
     },
     {
-      title: "Thao Tác",
+      title: "Author",
+      dataIndex: "authorName",
+      key: "authorName",
+      render: (authorName) => (
+        <span className="font-medium text-zinc-650">
+          {authorName}
+        </span>
+      ),
+    },
+    {
+      title: "Reviews Count",
+      dataIndex: "reviewsCount",
+      key: "reviewsCount",
+      render: (count) => (
+        <span className="inline-block rounded-full bg-zinc-50 px-3 py-1 text-xs font-medium text-zinc-500">
+          {count || 0} reviews
+        </span>
+      ),
+    },
+    {
+      title: "Actions",
       key: "action",
       width: 180,
       render: (_, record) => (
         <Space size="middle">
           <Button
             type="link"
-            className="text-violet-600 hover:text-violet-750 font-bold p-0 cursor-pointer"
-            onClick={() => navigate(`/books/${record.id}/edit`)}
+            className="text-violet-650 hover:text-violet-750 font-semibold p-0 cursor-pointer"
+            onClick={() => setEditingId(record.id)}
+            icon={<EditOutlined />}
           >
-            Sửa
+            Edit
           </Button>
           <Popconfirm
-            title="Xóa sách"
-            description="Bạn có chắc chắn muốn xóa cuốn sách này không? Tất cả review liên quan sẽ bị xóa."
+            title="Delete book"
+            description="Are you sure you want to delete this book? All associated reviews will be deleted."
             onConfirm={() => handleDelete(record.id)}
-            okText="Xóa"
-            cancelText="Hủy"
+            okText="Delete"
+            cancelText="Cancel"
             okButtonProps={{ danger: true, className: "bg-red-500 text-white cursor-pointer" }}
           >
-            <Button type="link" danger className="font-bold p-0 cursor-pointer">
-              Xóa
+            <Button type="link" danger className="font-semibold p-0 cursor-pointer" icon={<DeleteOutlined />}>
+              Delete
             </Button>
           </Popconfirm>
         </Space>
@@ -113,26 +114,26 @@ export default function BookList() {
       {/* Header section with add button */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1.5">
-          <h1 className="text-3xl font-black text-zinc-900 tracking-tight">
-            Quản Lý Sách
+          <h1 className="text-3xl font-bold text-zinc-850 tracking-tight">
+            Book Management
           </h1>
           <p className="text-sm text-zinc-500 font-light">
-            Xem danh sách các đầu sách, tác giả tương ứng, số lượt review và thực hiện chỉnh sửa, quản lý dữ liệu.
+            View the list of books, their authors, reviews count, and manage entries.
           </p>
         </div>
         
         <button
           onClick={() => navigate('/books/create')}
-          className="rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold px-5 py-3 transition-all cursor-pointer shadow-md shadow-violet-500/10 flex items-center justify-center gap-2 self-start sm:self-center"
+          className="rounded-xl bg-violet-600 hover:bg-violet-750 text-white font-semibold px-5 py-3 transition-all cursor-pointer shadow-md shadow-violet-500/10 flex items-center justify-center gap-2 self-start sm:self-center"
         >
           <Plus className="h-5 w-5" strokeWidth={2.5} />
-          <span>Thêm Sách Mới</span>
+          <span>Add Book</span>
         </button>
       </div>
 
       {/* Main Table view */}
       <div className="bg-white border border-zinc-150/80 rounded-3xl p-6 shadow-xs">
-        <Spin spinning={loading} tip="Đang tải dữ liệu...">
+        <Spin spinning={loading} tip="Loading data...">
           <Table
             columns={columns}
             dataSource={books.map(book => ({ ...book, key: book.id }))}
@@ -144,10 +145,36 @@ export default function BookList() {
               showSizeChanger: false,
               className: "pt-4",
             }}
+            scroll={{ x: 'max-content' }}
             className="ant-table-custom"
           />
         </Spin>
       </div>
+
+      {/* Edit Book Modal */}
+      <Modal
+        title={<span className="text-xl font-bold text-zinc-800">Edit Book</span>}
+        open={editingId !== null}
+        onCancel={() => setEditingId(null)}
+        footer={null}
+        destroyOnClose
+        centered
+        styles={{
+          content: {
+            borderRadius: "24px",
+            padding: "24px",
+          }
+        }}
+      >
+        <BookForm
+          id={editingId}
+          onSuccess={() => {
+            setEditingId(null);
+            dispatch(fetchBooks({ page: pagination.currentPage, size: pagination.pageSize }));
+          }}
+          onCancel={() => setEditingId(null)}
+        />
+      </Modal>
     </div>
   );
 }

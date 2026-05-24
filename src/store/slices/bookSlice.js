@@ -31,14 +31,13 @@ export const fetchBookDetail = createAsyncThunk(
 // 3. Create a new book
 export const createBook = createAsyncThunk(
   "books/createBook",
-  async (bookData, { rejectWithValue, dispatch }) => {
+  async (bookData, { rejectWithValue }) => {
     try {
       const data = await bookService.create(bookData);
       notification.success({
-        message: "Thành công",
-        description: "Thêm mới cuốn sách thành công!",
+        message: "Success",
+        description: "Book created successfully!",
       });
-      dispatch(fetchBooks({ page: 0 }));
       return data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -49,14 +48,13 @@ export const createBook = createAsyncThunk(
 // 4. Update a book
 export const updateBook = createAsyncThunk(
   "books/updateBook",
-  async ({ id, bookData }, { rejectWithValue, dispatch }) => {
+  async ({ id, bookData }, { rejectWithValue }) => {
     try {
       const data = await bookService.update(id, bookData);
       notification.success({
-        message: "Thành công",
-        description: "Cập nhật sách thành công!",
+        message: "Success",
+        description: "Book updated successfully!",
       });
-      dispatch(fetchBooks({ page: 0 }));
       return data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -67,14 +65,13 @@ export const updateBook = createAsyncThunk(
 // 5. Delete a book
 export const deleteBook = createAsyncThunk(
   "books/deleteBook",
-  async (id, { rejectWithValue, dispatch }) => {
+  async (id, { rejectWithValue }) => {
     try {
       await bookService.delete(id);
       notification.success({
-        message: "Thành công",
-        description: "Xóa sách thành công!",
+        message: "Success",
+        description: "Book deleted successfully!",
       });
-      dispatch(fetchBooks({ page: 0 }));
       return id;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -122,7 +119,7 @@ const bookSlice = createSlice({
       })
       .addCase(fetchBooks.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Không thể tải danh sách sách.";
+        state.error = action.payload || "Failed to load books list.";
       })
 
       // Fetch Book Detail
@@ -136,7 +133,7 @@ const bookSlice = createSlice({
       })
       .addCase(fetchBookDetail.rejected, (state, action) => {
         state.detailLoading = false;
-        state.error = action.payload || "Không thể tải thông tin cuốn sách.";
+        state.error = action.payload || "Failed to load book details.";
       });
   },
 });

@@ -1,1 +1,43 @@
 @import "tailwindcss";
+
+/* Sidebar Collapse Premium Dark Overrides */
+.sidebar-collapse-custom.ant-collapse {
+  border: none !important;
+  background: transparent !important;
+}
+
+.sidebar-collapse-custom .ant-collapse-item {
+  border-bottom: none !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.sidebar-collapse-custom .ant-collapse-header {
+  padding: 10px 8px !important;
+  align-items: center !important;
+  color: #d4d4d8 !important; /* text-zinc-300 */
+  font-weight: 500 !important;
+  transition: all 0.2s ease !important;
+}
+
+.sidebar-collapse-custom .ant-collapse-header:hover {
+  color: #ffffff !important;
+}
+
+.sidebar-collapse-custom .ant-collapse-header .ant-collapse-expand-icon {
+  color: #71717a !important; /* text-zinc-500 */
+}
+
+.sidebar-collapse-custom .ant-collapse-content {
+  background-color: transparent !important;
+  border-top: none !important;
+}
+
+.sidebar-collapse-custom .ant-collapse-content-box {
+  padding: 0px 4px 8px 4px !important;
+}
+
+/* Force Antd Links to inherit colors properly and avoid standard blue colors */
+.sidebar-collapse-custom a {
+  color: inherit !important;
+  text-decoration: none !important;
+}

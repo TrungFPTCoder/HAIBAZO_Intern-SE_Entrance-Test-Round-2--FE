@@ -16,10 +16,10 @@ export default function NotFound() {
 
       <div className="space-y-3 max-w-md mb-8">
         <h2 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100">
-          Ồ! Trang này không tồn tại
+          Oops! Page not found
         </h2>
-        <p className="text-zinc-500 dark:text-zinc-400 font-light text-sm md:text-base leading-relaxed">
-          Đường dẫn có thể đã bị thay đổi, bị xóa, hoặc bạn đã gõ nhầm địa chỉ URL. Hãy quay về trang chủ để tiếp tục khám phá nhé.
+        <p className="text-zinc-550 dark:text-zinc-400 font-light text-sm md:text-base leading-relaxed">
+          The link might be broken, deleted, or you might have mistyped the URL. Go back to the homepage to continue exploring.
         </p>
       </div>
 
@@ -28,7 +28,7 @@ export default function NotFound() {
         className="inline-flex items-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-750 text-white font-bold px-6 py-3.5 transition-all shadow-md shadow-violet-500/20 hover:shadow-lg hover:scale-[1.02] cursor-pointer"
       >
         <Home className="h-5 w-5" />
-        <span>Quay về trang chủ</span>
+        <span>Back to Homepage</span>
       </Link>
     </div>
   );

@@ -31,15 +31,13 @@ export const fetchAuthorDetail = createAsyncThunk(
 // 3. Create a new author
 export const createAuthor = createAsyncThunk(
   "authors/createAuthor",
-  async (authorData, { rejectWithValue, dispatch }) => {
+  async (authorData, { rejectWithValue }) => {
     try {
       const data = await authorService.create(authorData);
       notification.success({
-        message: "Thành công",
-        description: "Thêm mới tác giả thành công!",
+        message: "Success",
+        description: "Author created successfully!",
       });
-      // Automatically refresh the current page
-      dispatch(fetchAuthors({ page: 0 }));
       return data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -50,14 +48,13 @@ export const createAuthor = createAsyncThunk(
 // 4. Update an author
 export const updateAuthor = createAsyncThunk(
   "authors/updateAuthor",
-  async ({ id, authorData }, { rejectWithValue, dispatch }) => {
+  async ({ id, authorData }, { rejectWithValue }) => {
     try {
       const data = await authorService.update(id, authorData);
       notification.success({
-        message: "Thành công",
-        description: "Cập nhật thông tin tác giả thành công!",
+        message: "Success",
+        description: "Author updated successfully!",
       });
-      dispatch(fetchAuthors({ page: 0 }));
       return data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -68,14 +65,13 @@ export const updateAuthor = createAsyncThunk(
 // 5. Delete an author
 export const deleteAuthor = createAsyncThunk(
   "authors/deleteAuthor",
-  async (id, { rejectWithValue, dispatch }) => {
+  async (id, { rejectWithValue }) => {
     try {
       await authorService.delete(id);
       notification.success({
-        message: "Thành công",
-        description: "Xóa tác giả thành công!",
+        message: "Success",
+        description: "Author deleted successfully!",
       });
-      dispatch(fetchAuthors({ page: 0 }));
       return id;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -123,7 +119,7 @@ const authorSlice = createSlice({
       })
       .addCase(fetchAuthors.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Không thể tải danh sách tác giả.";
+        state.error = action.payload || "Failed to load authors list.";
       })
 
       // Fetch Author Detail
@@ -137,7 +133,7 @@ const authorSlice = createSlice({
       })
       .addCase(fetchAuthorDetail.rejected, (state, action) => {
         state.detailLoading = false;
-        state.error = action.payload || "Không thể tải thông tin tác giả.";
+        state.error = action.payload || "Failed to load author details.";
       });
   },
 });

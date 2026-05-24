@@ -1,55 +1,75 @@
 import React from "react";
+import { useLocation } from "react-router-dom";
 import { Breadcrumb } from "antd";
-import { Link, useLocation } from "react-router-dom";
-
-const breadcrumbNameMap = {
-  "/books": "Danh sách Sách",
-  "/authors": "Tác giả",
-  "/reviews": "Đánh giá",
-};
 
 export default function AppBreadcrumb() {
   const location = useLocation();
-  const pathSnippets = location.pathname.split("/").filter((i) => i);
+  const pathname = location.pathname;
 
-  const extraBreadcrumbItems = pathSnippets.map((_, index) => {
-    const url = `/${pathSnippets.slice(0, index + 1).join("/")}`;
-
-    // Check if the current snippet might be an ID (e.g., number or UUID)
-    const currentSnippet = pathSnippets[index];
-    const isId = !isNaN(currentSnippet) || currentSnippet.length > 15;
-
-    let name = breadcrumbNameMap[url];
-    if (!name) {
-      if (isId && index > 0) {
-        name = "Chi tiết";
-      } else {
-        // Fallback: capitalize the first letter
-        name = currentSnippet.charAt(0).toUpperCase() + currentSnippet.slice(1);
-      }
+  // Generate customized breadcrumb segments based on pathname
+  let segments = [];
+  if (pathname.startsWith("/authors")) {
+    segments.push("authors");
+    if (pathname.endsWith("/create")) {
+      segments.push("create");
+    } else if (pathname.endsWith("/edit")) {
+      segments.push("edit");
+    } else {
+      segments.push("list");
     }
+  } else if (pathname.startsWith("/books")) {
+    segments.push("books");
+    if (pathname.endsWith("/create")) {
+      segments.push("create");
+    } else if (pathname.endsWith("/edit")) {
+      segments.push("edit");
+    } else {
+      segments.push("list");
+    }
+  } else if (pathname.startsWith("/reviews")) {
+    segments.push("reviews");
+    if (pathname.endsWith("/create")) {
+      segments.push("create");
+    } else if (pathname.endsWith("/edit")) {
+      segments.push("edit");
+    } else {
+      segments.push("list");
+    }
+  } else {
+    // Fallback split logic
+    segments = pathname.split("/").filter(Boolean);
+  }
 
-    return {
-      key: url,
-      title: <Link to={url}>{name}</Link>,
-    };
-  });
-
-  const breadcrumbItems = [
-    {
-      title: <Link to="/">Trang chủ</Link>,
-      key: "home",
-    },
-  ].concat(extraBreadcrumbItems);
-
-  // If we are at root, maybe don't show breadcrumb or just show Home
-  if (location.pathname === "/") {
+  // If on the root page, we don't show any breadcrumbs
+  if (segments.length === 0 || pathname === "/") {
     return null;
   }
 
+  // Map segments to Antd Breadcrumb items
+  const breadcrumbItems = segments.map((seg, idx) => {
+    const isLast = idx === segments.length - 1;
+    return {
+      key: seg,
+      title: (
+        <span
+          className={
+            isLast
+              ? "text-violet-600! font-semibold! capitalize tracking-wider"
+              : "text-zinc-500! font-medium! capitalize tracking-wider"
+          }
+        >
+          {seg}
+        </span>
+      ),
+    };
+  });
+
   return (
-    <div className="mb-6">
-      <Breadcrumb items={breadcrumbItems} />
+    <div className="mb-6 select-none">
+      <Breadcrumb
+        separator=">"
+        items={breadcrumbItems}
+      />
     </div>
   );
 }

@@ -31,18 +31,13 @@ export const fetchReviewDetail = createAsyncThunk(
 // 3. Create a new review
 export const createReview = createAsyncThunk(
   "reviews/createReview",
-  async (reviewData, { rejectWithValue, dispatch }) => {
+  async (reviewData, { rejectWithValue }) => {
     try {
       const data = await reviewService.create(reviewData);
       notification.success({
-        message: "Thành công",
-        description: "Thêm bài đánh giá thành công!",
+        message: "Success",
+        description: "Review created successfully!",
       });
-      if (reviewData && reviewData.bookId) {
-        dispatch(fetchReviews({ bookId: reviewData.bookId, page: 0 }));
-      } else {
-        dispatch(fetchReviews({ page: 0 }));
-      }
       return data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -53,18 +48,13 @@ export const createReview = createAsyncThunk(
 // 4. Update a review
 export const updateReview = createAsyncThunk(
   "reviews/updateReview",
-  async ({ id, reviewData }, { rejectWithValue, dispatch }) => {
+  async ({ id, reviewData }, { rejectWithValue }) => {
     try {
       const data = await reviewService.update(id, reviewData);
       notification.success({
-        message: "Thành công",
-        description: "Cập nhật đánh giá thành công!",
+        message: "Success",
+        description: "Review updated successfully!",
       });
-      if (reviewData && reviewData.bookId) {
-        dispatch(fetchReviews({ bookId: reviewData.bookId, page: 0 }));
-      } else {
-        dispatch(fetchReviews({ page: 0 }));
-      }
       return data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -75,14 +65,13 @@ export const updateReview = createAsyncThunk(
 // 5. Delete a review
 export const deleteReview = createAsyncThunk(
   "reviews/deleteReview",
-  async (id, { rejectWithValue, dispatch }) => {
+  async (id, { rejectWithValue }) => {
     try {
       await reviewService.delete(id);
       notification.success({
-        message: "Thành công",
-        description: "Xóa bài đánh giá thành công!",
+        message: "Success",
+        description: "Review deleted successfully!",
       });
-      dispatch(fetchReviews({ page: 0 }));
       return id;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
@@ -130,7 +119,7 @@ const reviewSlice = createSlice({
       })
       .addCase(fetchReviews.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Không thể tải danh sách review.";
+        state.error = action.payload || "Failed to load reviews list.";
       })
 
       // Fetch Review Detail
@@ -144,7 +133,7 @@ const reviewSlice = createSlice({
       })
       .addCase(fetchReviewDetail.rejected, (state, action) => {
         state.detailLoading = false;
-        state.error = action.payload || "Không thể tải chi tiết bài review.";
+        state.error = action.payload || "Failed to load review details.";
       });
   },
 });

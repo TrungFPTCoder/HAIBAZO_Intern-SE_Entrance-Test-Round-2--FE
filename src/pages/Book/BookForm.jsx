@@ -1,22 +1,25 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { Form, Input, Select, Button, Space, Spin, message } from "antd";
-import { fetchBooks, createBook, updateBook, fetchBookDetail, clearCurrentBook } from "../../store/slices/bookSlice";
+import { createBook, updateBook, fetchBookDetail, clearCurrentBook } from "../../store/slices/bookSlice";
 import { useInfiniteScroll } from "../../hooks/useInfiniteScroll";
 import authorService from "../../services/authorService";
 
-export default function BookForm() {
+export default function BookForm({ id: propId, onSuccess, onCancel }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { id } = useParams();
-  const [form] = Form.useForm();
-
+  const { id: routeId } = useParams();
+  const id = propId !== undefined ? propId : routeId;
   const isEdit = Boolean(id);
+  const isModal = propId !== undefined;
+
+  const [form] = Form.useForm();
+  const [submitting, setSubmitting] = useState(false);
 
   const { currentBook, detailLoading: loadingBooks } = useSelector((state) => state.books);
   
-  // Sử dụng lazyloading / infinite scroll thay cho tải 100 tác giả
+  // Infinite scroll for lazy loading authors instead of fetching 100
   const { items: authors, loading: loadingAuthors, onPopupScroll } = useInfiniteScroll(authorService.getAll);
 
   useEffect(() => {
@@ -44,7 +47,7 @@ export default function BookForm() {
     }));
     const editingBook = isEdit ? currentBook : null;
     if (editingBook && editingBook.authorId && !authors.find(a => a.id === editingBook.authorId)) {
-      opts.unshift({ value: editingBook.authorId, label: editingBook.authorName || `Tác giả #${editingBook.authorId}` });
+      opts.unshift({ value: editingBook.authorId, label: editingBook.authorName || `Author #${editingBook.authorId}` });
     }
     return opts;
   })();
@@ -55,96 +58,118 @@ export default function BookForm() {
       authorId: values.authorId,
     };
 
+    setSubmitting(true);
     if (isEdit) {
       dispatch(updateBook({ id, bookData })).unwrap().then(() => {
-        message.success("Cập nhật sách thành công!");
-        navigate("/books");
+        setSubmitting(false);
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate("/books");
+        }
       }).catch((err) => {
-        message.error("Lỗi khi cập nhật: " + err);
+        setSubmitting(false);
+        message.error("Error updating book: " + err);
       });
     } else {
       dispatch(createBook(bookData)).unwrap().then(() => {
-        message.success("Thêm sách mới thành công!");
-        navigate("/books");
+        setSubmitting(false);
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate("/books");
+        }
       }).catch((err) => {
-        message.error("Lỗi khi thêm sách: " + err);
+        setSubmitting(false);
+        message.error("Error creating book: " + err);
       });
     }
   };
 
+  const formContent = (
+    <Spin spinning={isEdit && loadingBooks} tip="Loading data...">
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+        validateTrigger="onSubmit"
+      >
+        <Form.Item
+          name="name"
+          label={<span className="font-medium text-zinc-655">Book Title</span>}
+          rules={[
+            { required: true, message: "Name must not empty" },
+            { whitespace: true, message: "Name must not empty" }
+          ]}
+        >
+          <Input
+            placeholder="e.g., Norwegian Wood"
+            size="large"
+            className="rounded-xl"
+          />
+        </Form.Item>
+
+        <Form.Item
+          name="authorId"
+          label={<span className="font-medium text-zinc-655">Author</span>}
+          rules={[{ required: true, message: "Author must not empty" }]}
+        >
+          <Select
+            placeholder="Select author from list"
+            size="large"
+            className="rounded-xl select-custom"
+            showSearch={{
+              optionFilterProp: "label"
+            }}
+            onPopupScroll={onPopupScroll}
+            loading={loadingAuthors}
+            options={authorOptions}
+          />
+        </Form.Item>
+        
+        <Form.Item className="mb-0 flex justify-end gap-2 pt-4 border-t border-zinc-100">
+          <Space>
+            <Button 
+              onClick={() => isModal ? onCancel() : navigate("/books")} 
+              size="large" 
+              className="rounded-xl cursor-pointer font-semibold"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              htmlType="submit"
+              size="large"
+              loading={submitting}
+              className="bg-violet-655 hover:bg-violet-750 text-white rounded-xl cursor-pointer font-semibold"
+            >
+              {isEdit ? "Update" : "Create"}
+            </Button>
+          </Space>
+        </Form.Item>
+      </Form>
+    </Spin>
+  );
+
+  if (isModal) {
+    return formContent;
+  }
+
   return (
     <div className="space-y-8 animate-fade-in max-w-2xl mx-auto">
       <div className="space-y-1.5">
-        <h1 className="text-3xl font-black text-zinc-900 tracking-tight">
-          {isEdit ? "Cập Nhật Thông Tin Cuốn Sách" : "Thêm Cuốn Sách Mới"}
+        <h1 className="text-3xl font-bold text-zinc-850 tracking-tight">
+          {isEdit ? "Update Book" : "Create Book"}
         </h1>
         <p className="text-sm text-zinc-500 font-light">
-          {isEdit ? "Chỉnh sửa thông tin chi tiết của cuốn sách trong hệ thống." : "Điền thông tin bên dưới để thêm một cuốn sách mới vào hệ thống."}
+          {isEdit ? "Edit the detailed information of the book in the database." : "Fill in the details below to add a new book to the system."}
         </p>
       </div>
 
       <div className="bg-white border border-zinc-150/80 rounded-3xl p-8 shadow-xs">
-        <Spin spinning={loadingBooks || loadingAuthors} tip="Đang tải dữ liệu...">
-          <Form
-            form={form}
-            layout="vertical"
-            onFinish={handleSubmit}
-          >
-            <Form.Item
-              name="name"
-              label={<span className="font-semibold text-zinc-700">Tên cuốn sách</span>}
-              rules={[
-                { required: true, message: "Tên sách không được để trống!" },
-                { whitespace: true, message: "Tên sách không được chỉ chứa khoảng trắng!" }
-              ]}
-            >
-              <Input
-                placeholder="Ví dụ: Norwegian Wood"
-                size="large"
-                className="rounded-xl"
-              />
-            </Form.Item>
-
-            <Form.Item
-              name="authorId"
-              label={<span className="font-semibold text-zinc-700">Tác giả</span>}
-              rules={[{ required: true, message: "Vui lòng chọn tác giả viết sách!" }]}
-            >
-              <Select
-                placeholder="Chọn tác giả từ danh sách"
-                size="large"
-                className="rounded-xl select-custom"
-                showSearch={{
-                  optionFilterProp: "label"
-                }}
-                onPopupScroll={onPopupScroll}
-                loading={loadingAuthors}
-                options={authorOptions}
-              />
-            </Form.Item>
-            
-            <Form.Item className="mb-0 flex justify-end gap-2 pt-4 border-t border-zinc-100">
-              <Space>
-                <Button 
-                  onClick={() => navigate("/books")} 
-                  size="large" 
-                  className="rounded-xl cursor-pointer font-semibold"
-                >
-                  Hủy
-                </Button>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  size="large"
-                  className="bg-violet-600 hover:bg-violet-750 text-white rounded-xl cursor-pointer font-semibold"
-                >
-                  {isEdit ? "Cập nhật" : "Tạo sách mới"}
-                </Button>
-              </Space>
-            </Form.Item>
-          </Form>
-        </Spin>
+        {formContent}
       </div>
     </div>
   );
 }
+

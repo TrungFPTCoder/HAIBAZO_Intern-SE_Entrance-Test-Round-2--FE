@@ -15,10 +15,6 @@ export const reviewRoutes = [
         path: "create",
         element: <ReviewForm />,
       },
-      {
-        path: ":id/edit",
-        element: <ReviewForm />,
-      },
     ],
   },
 ];
