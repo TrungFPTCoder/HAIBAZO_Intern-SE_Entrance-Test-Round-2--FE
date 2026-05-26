@@ -1,0 +1,39 @@
+.sidebar-collapse-custom.ant-collapse{
+    border: none !important;
+    background: transparent !important;
+}
+
+.sidebar-collapse-custom .ant-collapse-item{
+    border-bottom: none !important;
+    margin-bottom: 0.5rem !important;
+}
+
+.sidebar-collapse-custom .ant-collapse-header{
+    padding: 10px 8px !important;
+    align-items: center !important;
+    color: #d4d4d8 !important;
+    font-weight: 500 !important;
+    transition: all 0.2 ease !important;
+}
+
+.sidebar-collapse-custom .ant-collapse-header:hover{
+    color: #ffffff !important;
+}
+
+.sidebar-collapse-custom .ant-collapse-header .ant-collapse-expand-icon {
+    color: #71717a !important;
+}
+
+.sidebar-collapse-custom .ant-collapse-content{
+    background-color: transparent !important;
+    border-top: none !important;
+}
+
+.sidebar-collapse-custom .ant-collapse-content-box{
+    padding: 0px 4px 8px 4px !important;
+}
+
+.sidebar-collapse-custom a{
+    color: inherit !important;
+    text-decoration: none !important;
+}
